@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  client_1:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    stop_signal: SIGINT
+    ports:
+      - '8000:8000'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+
+  client_2:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    stop_signal: SIGINT
+    ports:
+      - '8800:8000'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+
+  server:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    stop_signal: SIGINT
+    ports:
+      - '9000:8000'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+

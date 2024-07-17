@@ -1,0 +1,10 @@
+flask
+docker
+torch
+Pillow
+numpy
+torchvision
+matplotlib
+ml_collections
+lpips
+scikit-learn==1.0.2
