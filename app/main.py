@@ -115,19 +115,21 @@ def train_worker_directory():
         }
     )
 
+'''
 
 @app.route('/train-worker-on-labels-list', methods=['POST'])
 def train_worker_directory_on_labels_list():
     directory = request.json['directory']
     labels_list = request.json['labels_list']
+    transform1 = torchvision.transforms.Compose([
+    torchvision.transforms.Grayscale(num_output_channels=1), 
+    torchvision.transforms.Resize((32, 32)), 
+    torchvision.transforms.ToTensor(), 
+    torchvision.transforms.Normalize((0.1307,), (0.3081,))  ])
     # Load dataset from directory
     dataset = CustomDatasetWithLabelsList(
         directory,
-        transform=torchvision.transforms.Compose([
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(
-                (0.1307,), (0.3081,))
-        ]),
+        transform=transform1,
         labels_list=labels_list
     )
     data_loader = torch.utils.data.DataLoader(
@@ -135,6 +137,9 @@ def train_worker_directory_on_labels_list():
         batch_size=32,
         shuffle=True
     )
+    for images, labels in data_loader:
+        print(f"Shape of images batch: {images.shape}")  
+        break 
     trained_model = train_model(app.model, data_loader)
     save_model(trained_model, "current_model")
     # Run validation
@@ -146,7 +151,7 @@ def train_worker_directory_on_labels_list():
             'accuracy': accuracy
         }
     )
-
+    
 
 @app.route('/fed-prox-train-worker-on-labels-list', methods=['POST'])
 def fed_prox_train_worker_directory_on_labels_list():
@@ -160,14 +165,13 @@ def fed_prox_train_worker_directory_on_labels_list():
     else:
         global_model = torch.load(io.BytesIO(bytes.fromhex(global_model)))
 
-    # Load dataset from directory
     dataset = CustomDatasetWithLabelsList(
         directory,
-        transform=torchvision.transforms.Compose([
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(
-                (0.1307,), (0.3081,))
-        ]),
+        transform= torchvision.transforms.Compose([
+            torchvision.transforms.Grayscale(num_output_channels=1), 
+            torchvision.transforms.Resize((32, 32)), 
+            torchvision.transforms.ToTensor(), 
+            torchvision.transforms.Normalize((0.1307,), (0.3081,))  ]),
         labels_list=labels_list
     )
     data_loader = torch.utils.data.DataLoader(
@@ -203,7 +207,7 @@ def validate_worker_directory_on_labels_list():
         }
     )
 
-
+'''
 @app.route('/fed-avg', methods=['POST'])
 def federated_average_route():
     data = request.json
@@ -219,6 +223,7 @@ def federated_average_route():
     return jsonify({'model': hex_model})
 
 
+'''
 @app.route('/set-model', methods=['POST'])
 def set_model():
     model = request.json['model']
@@ -227,13 +232,12 @@ def set_model():
     )
     return jsonify({'status': 'success'})
 
-
 @app.route('/get-model', methods=['GET'])
 def get_model():
     hex_model = model_to_hex(app.model)
     return jsonify({'model': hex_model})
 
-'''
+
 if __name__ == '__main__':
     random.seed(0)
     np.random.seed(0)
