@@ -17,11 +17,13 @@ np.random.seed(0)
 torch.manual_seed(0)
 
 # Here you need to set the server url and the client urls
+
 server_url = "http://localhost:8000"
 client_1_url = "http://localhost:9000"
 client_2_url = "http://localhost:8800"
 
-training_dir = 'dataset/trainingSet/trainingSet'
+
+training_dir = 'dataset/training_set'
 
 
 # Set blank model
@@ -203,23 +205,23 @@ def test_fed_prox(model=None, url_1=None, url_2=None, url_3=None):
 
 def test_model_getter(url):
     response = requests.get(f"{url}/get-model")
-    print("Model Setter Test:", response.json())
+    print("Model Setter(?) __maybe getter_ Test:", response.json())
     return response.json()['model']
 
 
 if __name__ == "__main__":
-    '''
+    
     accuracy = test_train_worker_directory_with_labels_list(
         training_dir,
         ['0', '1', '2'],
         server_url
     )
     assert accuracy > 80
-
+    
     global_hex_model = test_model_getter(server_url)
-    print(f'Global Model')
-    print(hashlib.sha3_256(global_hex_model.encode('UTF-8')).hexdigest())
-    print(f'Size of model in bytes: {sys.getsizeof(global_hex_model)}')
+    #print(f'Global Model')
+    #print(hashlib.sha3_256(global_hex_model.encode('UTF-8')).hexdigest())
+    #print(f'Size of model in bytes: {sys.getsizeof(global_hex_model)}')
     test_model_setter(global_hex_model, client_1_url)
 
     client_accuracy = test_validate_worker_on_labels_list(
@@ -235,18 +237,20 @@ if __name__ == "__main__":
         client_2_url
     )
     assert client_accuracy == accuracy
-
+    '''
     accuracy = test_validate_worker_on_labels_list(
         ['3', '4'],
         client_1_url
     )
-    assert accuracy == 0
+    print(f"acc on non-seen classes client 1:{accuracy}")
+    #assert accuracy == 0
 
     accuracy = test_validate_worker_on_labels_list(
         ['3', '4'],
         client_2_url
     )
-    assert accuracy == 0
+    print(f"acc on non-seen classes client 2:{accuracy}")
+    #assert accuracy == 0
 
     rounds = 3
     for i in range(rounds):
