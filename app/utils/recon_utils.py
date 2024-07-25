@@ -34,15 +34,17 @@ def get_model_ema(config, model_path):
 
   return score_model
 
-'''def compare_model_weights(model, loaded_state_dict):
-    for name, param in model.state_dict().items():
-        if name in loaded_state_dict:
-            if torch.equal(param, loaded_state_dict[name]):
-                print(f"{name} weights match.")
-            else:
-                print(f"{name} weights do not match.")
-        else:
-            print(f"{name} n''ot found in loaded state dict.")'''
+
+def get_model_ema_current_model(config, loaded_state):
+    score_model = create_model(config)
+    optimizer = get_optimizer(config, score_model.parameters())
+    ema = ExponentialMovingAverage(score_model.parameters(), decay=config.model.ema_rate)
+
+    loaded_state['ema'].copy_to(score_model.parameters())
+
+    return score_model
+
+
 
 def get_model_fn(model, train=False):
   def model_fn(x, labels):
@@ -95,6 +97,9 @@ def restore_model(model_dir, state, device):
     state['ema'].load_state_dict(loaded_state['ema'])
     state['step'] = loaded_state['step']
     return state
+
+
+  
 
 class ExponentialMovingAverage:
   """
