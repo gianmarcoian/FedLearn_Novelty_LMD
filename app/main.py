@@ -19,9 +19,9 @@ from utils.utils import run_model, run_monte_carlo, train_model, save_model, \
     validate_model, train_model_with_fedprox, model_to_hex, federated_average, \
     save_and_load_hex_model, image_transf, image_transf_cl
 from utils.configs import get_default_configs
-from utils.recon import run_recon
+from utils.recon import  run_recon_pretrained_model, run_recon_current_model
 from utils.detect import detect
-
+from utils.train_ddpm import train_ddpm
 
 config = get_default_configs()
 
@@ -39,6 +39,7 @@ class FederatedLearningServer(Flask):
     def __init__(self, *args, **kwargs):
         super(FederatedLearningServer, self).__init__(*args, **kwargs)
         self.model = CNN()
+        self.model_ddpm = DDPM(config)
         if os.path.exists("current_model.pth"):
             self.model.load_state_dict(torch.load("current_model.pth"))
         '''
@@ -69,7 +70,8 @@ def infer():
         #classification
         prediction = run_model(image_out_class, app.model)
         #detection
-        run_recon(image_in,image_out, config)
+        #run_recon_pretrained_model(image_in,image_out, config)
+        run_recon_current_model(image_in,image_out, config, app.ddpm_state)
         is_ood = bool(detect())
         return jsonify({'prediction': prediction[1], 'is_ood': is_ood})
     
@@ -78,48 +80,11 @@ def infer():
         return jsonify({'error': str(e)}), 500
 
 
-'''
-@app.route('/train_ddpm', methods=['POST'])
-def train_ddpm():
-    run_ddp_training(app.model_novelty)
-    return jsonify({'training processing...'})
-    
-
-
-@app.route('/train-worker-directory', methods=['POST'])
-def train_worker_directory():
-    directory = request.json['directory']
-    # Load dataset from directory
-    dataset = CustomDataset(
-        directory,
-        transform=torchvision.transforms.Compose([
-            torchvision.transforms.ToTensor(),
-            torchvision.transforms.Normalize(
-                (0.1307,), (0.3081,))
-        ])
-    )
-    data_loader = torch.utils.data.DataLoader(
-        dataset,
-        batch_size=32,
-        shuffle=True
-    )
-    trained_model = train_model(app.model, data_loader)
-    save_model(trained_model, "current_model")
-    loss, accuracy = validate_model(app.model)
-
-    app.model = trained_model
-    return jsonify(
-        {
-            'accuracy': accuracy,
-            'loss': loss
-        }
-    )
-
-'''
 
 @app.route('/train-worker-on-labels-list', methods=['POST'])
 def train_worker_directory_on_labels_list():
-    directory = request.json['directory']
+    directory_train = request.json['directory_train']
+    directory_eval=request.json['directory_eval']
     labels_list = request.json['labels_list']
     transform1 = torchvision.transforms.Compose([
     torchvision.transforms.Grayscale(num_output_channels=1), 
@@ -128,7 +93,7 @@ def train_worker_directory_on_labels_list():
     torchvision.transforms.Normalize((0.1307,), (0.3081,))  ])
     # Load dataset from directory
     dataset = CustomDatasetWithLabelsList(
-        directory,
+        directory_train,
         transform=transform1,
         labels_list=labels_list
     )
@@ -140,18 +105,27 @@ def train_worker_directory_on_labels_list():
     for images, labels in data_loader:
         print(f"Shape of images batch: {images.shape}")  
         break 
-    trained_model = train_model(app.model, data_loader)
-    save_model(trained_model, "current_model")
-    # Run validation
-    app.model = trained_model
-    loss, accuracy = validate_model(app.model, labels_list=labels_list)
+    #trained_model = train_model(app.model, data_loader)
+    #save_model(trained_model, "current_model")
+    #app.model = trained_model
+    #loss, accuracy = validate_model(app.model, labels_list=labels_list)
+    ddpm_state= train_ddpm(config,directory_train , directory_eval, labels_list)
+    app.ddpm_state=ddpm_state
+    app.model_ddpm=ddpm_state['model']
+    '''
     return jsonify(
         {
-            'loss': loss,
-            'accuracy': accuracy
+            'loss classification model': loss,
+            'accuracy classification model': accuracy
         }
     )
-    
+    '''
+    return jsonify(
+        {
+            'loss classification model': 0,
+            'accuracy classification model': 100
+        }
+    )
 
 @app.route('/fed-prox-train-worker-on-labels-list', methods=['POST'])
 def fed_prox_train_worker_directory_on_labels_list():
