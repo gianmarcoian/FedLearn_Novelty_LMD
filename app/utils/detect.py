@@ -22,13 +22,8 @@ def simclr_resize(x):
 def lpips_scaler(x):
     return x * 2. - 1.
 
-# Funzione per calcolare la metrica per una singola immagine
 def calculate_metric(orig, recon, metric):
     return lpips_criterion(lpips_scaler(orig.cuda()), lpips_scaler(recon.cuda())).flatten().detach().cpu().numpy()
-
-
-
-
 
 def detect():
     reps=10
