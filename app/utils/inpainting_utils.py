@@ -2,8 +2,8 @@ import torch
 import numpy as np
 import tqdm
 import functools
-from .train_ddpm import get_score_fn
 from .sampling import NoneCorrector, NonePredictor
+from .train_ddpm import get_score_fn
 
 import logging
 logger = logging.getLogger(__name__)
@@ -58,7 +58,6 @@ def get_pc_inpainter(sde, predictor, corrector, inverse_scaler, snr,
   projector_inpaint_update_fn = get_inpaint_update_fn(predictor_update_fn)
   corrector_inpaint_update_fn = get_inpaint_update_fn(corrector_update_fn)
   def pc_inpainter(model, data, mask):
-    logger.debug("entro qui?")
 
     with torch.no_grad():
       # Initial sample
