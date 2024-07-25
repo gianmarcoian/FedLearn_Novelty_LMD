@@ -37,7 +37,6 @@ def variance_scaling(scale, mode, distribution,
                      in_axis=1, out_axis=0,
                      dtype=torch.float32,
                      device='cpu'):
-  """Ported from JAX. """
 
   def _compute_fans(shape, in_axis=1, out_axis=0):
     receptive_field_size = np.prod(shape) / shape[in_axis] / shape[out_axis]
