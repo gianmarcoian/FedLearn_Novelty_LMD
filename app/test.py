@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 from utils.network import CNN
 import hashlib
 import sys
-from utils.recon import run_recon 
 from utils.utils import save_and_load_hex_model
 
 random.seed(0)
@@ -24,6 +23,7 @@ client_2_url = "http://localhost:8800"
 
 
 training_dir = 'dataset/training_set'
+eval_dir ='dataset/evaluation_2'
 
 
 # Set blank model
@@ -54,9 +54,9 @@ def image_to_bytes(image):
 
 
 
-def test_infer(folder):
+def test_infer():
     image_in = get_random_image(os.path.join('dataset/new_dataset_lmd/mnist_in', '1'))
-    image_out = get_random_image(os.path.join('dataset/new_dataset_lmd/mnist_out', '4'))
+    image_out = get_random_image(os.path.join('dataset/new_dataset_lmd/mnist_out', '5'))
     files = {
         'image_in': image_in,
         'image_out': image_out
@@ -133,16 +133,17 @@ def study_uncertainty(folder, number, num_inferences=1000):
 
 
 # Test for training from a directory and labels list
-def test_train_worker_directory_with_labels_list(directory_path, labels_list, url):
+def test_train_worker_directory_with_labels_list(directory_train,directory_eval, labels_list, url):
     response = requests.post(
         f"{url}/train-worker-on-labels-list",
         json={
-            'directory': directory_path,
+            'directory_train': directory_train,
+            'directory_eval': directory_eval,
             'labels_list': labels_list
         }
     )
     print("Train Worker Directory Test:", response.json())
-    return response.json()['accuracy']
+    return response.json()['accuracy classification model']
 
 
 # Test model setter
@@ -213,11 +214,15 @@ if __name__ == "__main__":
     
     accuracy = test_train_worker_directory_with_labels_list(
         training_dir,
-        ['0', '1', '2'],
+        eval_dir,
+        ['0', '1', '2','3','4'],
         server_url
     )
     assert accuracy > 80
     
+    test_infer()
+
+    '''
     global_hex_model = test_model_getter(server_url)
     #print(f'Global Model')
     #print(hashlib.sha3_256(global_hex_model.encode('UTF-8')).hexdigest())
@@ -237,7 +242,7 @@ if __name__ == "__main__":
         client_2_url
     )
     assert client_accuracy == accuracy
-    '''
+
     accuracy = test_validate_worker_on_labels_list(
         ['3', '4'],
         client_1_url
@@ -281,7 +286,5 @@ if __name__ == "__main__":
         global_hex_model = hex_model
 
     assert accuracy > 80
-    '''
-    test_infer('dataset/evaluation')
-    
+'''
 
