@@ -5,10 +5,10 @@ def get_default_configs():
   config = ml_collections.ConfigDict()
   config.training = training = ml_collections.ConfigDict()
   config.training.batch_size = 4
-  training.n_iters = 350001
+  training.n_iters = 15000
   training.snapshot_freq = 10000
   training.log_freq = 50
-  training.eval_freq = 100
+  training.eval_freq = 60
   training.snapshot_freq_for_preemption = 5000
   training.snapshot_sampling = True
   training.likelihood_weighting = False
