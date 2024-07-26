@@ -30,10 +30,10 @@ The compose.yaml generates the 3 container running the command ```docker-compose
 The requirements are written in app/requirements.txt
 
 ## Getting Started (how to run it)
-To test the program:
-```conda activate your-environment```
-```python main.py```
-```python test.py```
+To test the program: \
+```conda activate your-environment``` \
+```python main.py``` \
+```python test.py``` \
 Currently if you run the main.py (e.g. running it in your editor) and then you run test.py, it will generates some models using API '/train-worker-on-labels-list', so you can choose the MNIST classes by your convenience. Then it will automatically use the ddpm trained by the label_list chosen and test the inference picking a random image from the in_domain and from the out_domain. There is also the possibility to use pre-trained ddpm models, calling the run_recon_pretrained_model() function from recon.py, instead of recon.run_recon_current_model() (These 2 function are already in the inference service ('/infer'), but the run_recon_pretrained_model() call is currently commented).
 
 
