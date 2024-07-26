@@ -5,8 +5,8 @@ def get_default_configs():
   config = ml_collections.ConfigDict()
   config.training = training = ml_collections.ConfigDict()
   config.training.batch_size = 4
-  training.n_iters = 15000
-  training.snapshot_freq = 10000
+  training.n_iters = 18000
+  training.snapshot_freq = 6000 #10k before
   training.log_freq = 50
   training.eval_freq = 60
   training.snapshot_freq_for_preemption = 5000
@@ -28,7 +28,7 @@ def get_default_configs():
   config.eval = evaluate = ml_collections.ConfigDict()
   evaluate.begin_ckpt = 9
   evaluate.end_ckpt = 26
-  evaluate.batch_size = 1024
+  evaluate.batch_size = 512 #1024 before
   evaluate.enable_sampling = False
   evaluate.num_samples = 50000
   evaluate.enable_loss = True
